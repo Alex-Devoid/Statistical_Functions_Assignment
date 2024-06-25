@@ -1,0 +1,140 @@
+```markdown
+---
+title: "ST558-HW4"
+format: html
+author: "Alex Devoid" 
+date: "June 18, 2024"
+purpose: "ST558-HW4"
+---
+
+# Task 1: Conceptual Questions
+
+1. **What is the purpose of the `lapply()` function? What is the equivalent `purrr` function?**
+
+   The `lapply()` function in R is used to apply a function over a list or vector and return a list of the same length as the input. The equivalent function in the `purrr` package is `map()`, which also returns a list.
+
+2. **Suppose we have a list called `my_list`. Each element of the list is a numeric data frame (all columns are numeric). We want to use `lapply()` to run the code `cor(numeric_matrix, method = "kendall")` on each element of the list. Write code to do this below! (I’m really trying to ask you how you specify `method = "kendall"` when calling `lapply()`)**
+
+   ```r
+   my_list <- list(
+     data.frame(a = rnorm(10), b = rnorm(10)),
+     data.frame(a = rnorm(10), b = rnorm(10))
+   )
+
+   result <- lapply(my_list, function(x) cor(x, method = "kendall"))
+   ```
+
+3. **What are two advantages of using `purrr` functions instead of the BaseR apply family?**
+
+   - `purrr` functions have a consistent syntax and naming convention, making the code easier to read and write.
+   - `purrr` functions provide better error handling and more options for managing complex data structures, such as lists and nested lists.
+
+4. **What is a side-effect function?**
+
+   A side-effect function is a function that performs an action or produces an effect beyond returning a value. Examples of side effects include modifying a global variable, printing output to the console, writing to a file, or modifying the state of an object.
+
+5. **Why can you name a variable `sd` in a function and not cause any issues with the `sd` function?**
+
+   In R, the scope of a variable inside a function is limited to that function. This means that naming a variable `sd` within a function does not interfere with the global `sd` function because R can differentiate between the local variable and the global function based on the context in which they are used.
+   
+# Task 2
+```markdown
+# Task 2 - Writing R Functions
+
+1. **Write a basic function (call it getRMSE()) that takes in a vector of responses and a vector of predictions and outputs the RMSE.**
+
+   ```r
+   getRMSE <- function(actual, predicted, ...) {
+     sqrt(mean((actual - predicted)^2, ...))
+   }
+   ```
+
+2. **Run the following code to create some response values and predictions. Test your RMSE function using this data.**
+
+   ```r
+   set.seed(10)
+   n <- 100
+   x <- runif(n)
+   resp <- 3 + 10*x + rnorm(n)
+   pred <- predict(lm(resp ~ x), data.frame(x))
+   
+   # Test RMSE function
+   getRMSE(resp, pred)
+   
+   # Introduce NA values
+   resp[c(1, 2)] <- NA
+   
+   # Test RMSE function with NA values
+   getRMSE(resp, pred, na.rm = TRUE)
+   ```
+
+3. **Write a function called getMAE() that follows the specifications of the getRMSE() function.**
+
+   ```r
+   getMAE <- function(actual, predicted, ...) {
+     mean(abs(actual - predicted), ...)
+   }
+   ```
+
+4. **Run the following code to create some response values and predictions. Test your MAE function using this data.**
+
+   ```r
+   set.seed(10)
+   n <- 100
+   x <- runif(n)
+   resp <- 3 + 10*x + rnorm(n)
+   pred <- predict(lm(resp ~ x), data.frame(x))
+   
+   # Test MAE function
+   getMAE(resp, pred)
+   
+   # Introduce NA values
+   resp[c(1, 2)] <- NA
+   
+   # Test MAE function with NA values
+   getMAE(resp, pred, na.rm = TRUE)
+   ```
+
+5. **Create a wrapper function that can be used to get either or both metrics returned with a single function call.**
+
+   ```r
+   getMetrics <- function(actual, predicted, metrics = c("RMSE", "MAE"), ...) {
+     if (!(is.vector(actual) && is.atomic(actual) && is.numeric(actual) &&
+           is.vector(predicted) && is.atomic(predicted) && is.numeric(predicted))) {
+       message("Both inputs must be numeric vectors.")
+       return(NULL)
+     }
+     
+     results <- list()
+     if ("RMSE" %in% metrics) results$RMSE <- getRMSE(actual, predicted, ...)
+     if ("MAE" %in% metrics) results$MAE <- getMAE(actual, predicted, ...)
+     
+     return(results)
+   }
+   ```
+
+6. **Run the following code to create some response values and predictions. Test your new function using this data.**
+
+   ```r
+   set.seed(10)
+   n <- 100
+   x <- runif(n)
+   resp <- 3 + 10*x + rnorm(n)
+   pred <- predict(lm(resp ~ x), data.frame(x))
+   
+   # Test getMetrics function
+   getMetrics(resp, pred)
+   getMetrics(resp, pred, metrics = "RMSE")
+   getMetrics(resp, pred, metrics = "MAE")
+   
+   # Introduce NA values
+   resp[c(1, 2)] <- NA
+   
+   # Test getMetrics function with NA values
+   getMetrics(resp, pred, na.rm = TRUE)
+   
+   # Test with incorrect data
+   getMetrics(data.frame(resp), pred)
+   getMetrics(resp, data.frame(pred))
+   ```
+
