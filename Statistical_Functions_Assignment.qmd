@@ -189,6 +189,6 @@ articles_df2 <- query_news_api("finance", "2024-06-01", api_key)
 
 
 
-articles_df1
-articles_df2
+print(head(articles_df1))
+print(head(articles_df2))
 ```
