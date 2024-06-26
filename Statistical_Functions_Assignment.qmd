@@ -8,39 +8,41 @@ purpose: "ST558-HW4"
 
 # Task 1: Conceptual Questions
 
-1.  **What is the purpose of the `lapply()` function? What is the equivalent `purrr` function?**
 
-    The `lapply()` function in R is used to apply a function over a list or vector and return a list of the same length as the input. The equivalent function in the `purrr` package is `map()`, which also returns a list.
+1. **What is the purpose of the `lapply()` function? What is the equivalent `purrr` function?**
 
-2.  **Suppose we have a list called `my_list`. Each element of the list is a numeric data frame (all columns are numeric). We want to use `lapply()` to run the code `cor(numeric_matrix, method = "kendall")` on each element of the list. Write code to do this below! (I'm really trying to ask you how you specify `method = "kendall"` when calling `lapply()`)**
+   `lapply()` applies a function over a list or vector and returns a list of the same length. The equivalent function in the `purrr` package is `map()`, which also returns a list.
 
-``` r
-my_list <- list(
-  data.frame(a = rnorm(10), b = rnorm(10)),
-  data.frame(a = rnorm(10), b = rnorm(10))
-)
+2. **Suppose we have a list called `my_list`. Each element of the list is a numeric data frame (all columns are numeric). We want to use `lapply()` to run the code `cor(numeric_matrix, method = "kendall")` on each element of the list. Write code to do this below! (I'm really trying to ask you how you specify `method = "kendall"` when calling `lapply()`**
 
-result <- lapply(my_list, function(x) cor(x, method = "kendall"))
-```
+   ```r
+   my_list <- list(
+     data.frame(a = rnorm(10), b = rnorm(10)),
+     data.frame(a = rnorm(10), b = rnorm(10))
+   )
 
-3.  **What are two advantages of using `purrr` functions instead of the BaseR apply family?**
+   result <- lapply(my_list, function(x) cor(x, method = "kendall"))
+   ```
 
-    -   `purrr` functions have a consistent syntax and naming convention, making the code easier to read and write.
-    -   `purrr` functions provide better error handling and more options for managing complex data structures, such as lists and nested lists.
+3. **What are two advantages of using `purrr` functions instead of the BaseR apply family?**
 
-4.  **What is a side-effect function?**
+   - `purrr` functions have a consistent syntax and naming convention, making the code easier to read and write.
+   - `purrr` functions provide better error handling and more options for managing complex data, like nested lists.
 
-    A side-effect function is a function that performs an action or produces an effect beyond returning a value. Examples of side effects include modifying a global variable, printing output to the console, writing to a file, or modifying the state of an object.
+4. **What is a side-effect function?**
 
-5.  **Why can you name a variable `sd` in a function and not cause any issues with the `sd` function?**
+   A side-effect function performs an action beyond returning a value. For example, modifying a global variable.
 
-    In R, the scope of a variable inside a function is limited to that function. This means that naming a variable `sd` within a function does not interfere with the global `sd` function because R can differentiate between the local variable and the global function based on the context in which they are used.
+5. **Why can you name a variable `sd` in a function and not cause any issues with the `sd` function?**
+
+   The scope of a variable inside a function is limited to that function. Naming a variable `sd` within a function does not interfere with the global `sd` function because R can differentiate between the local variable and the global function.
+
 
 # Task 2 - Writing R Functions
 
 1.  **Write a basic function (call it getRMSE()) that takes in a vector of responses and a vector of predictions and outputs the RMSE.**
 
-``` r
+```{r}
 library(tidyverse)
 getRMSE <- function(actual, predicted, ...) {
 sqrt(mean((actual - predicted)^2, ...))
@@ -49,7 +51,7 @@ sqrt(mean((actual - predicted)^2, ...))
 
 2.  **Run the following code to create some response values and predictions. Test your RMSE function using this data.**
 
-``` r
+```{r}
 set.seed(10)
 n <- 100
 x <- runif(n)
@@ -68,7 +70,7 @@ getRMSE(resp, pred, na.rm = TRUE)
 
 3.  **Write a function called getMAE() that follows the specifications of the getRMSE() function.**
 
-    ``` r
+    ```{r}
     getMAE <- function(actual, predicted, ...) {
       mean(abs(actual - predicted), ...)
     }
@@ -76,7 +78,7 @@ getRMSE(resp, pred, na.rm = TRUE)
 
 4.  **Run the following code to create some response values and predictions. Test your MAE function using this data.**
 
-    ``` r
+    ```{r}
     set.seed(10)
     n <- 100
     x <- runif(n)
@@ -95,7 +97,7 @@ getRMSE(resp, pred, na.rm = TRUE)
 
 5.  **Create a wrapper function that can be used to get either or both metrics returned with a single function call.**
 
-    ``` r
+    ```{r}
     getMetrics <- function(actual, predicted, metrics = c("RMSE", "MAE"), ...) {
       if (!(is.vector(actual) && is.atomic(actual) && is.numeric(actual) &&
             is.vector(predicted) && is.atomic(predicted) && is.numeric(predicted))) {
@@ -113,7 +115,7 @@ getRMSE(resp, pred, na.rm = TRUE)
 
 6.  **Run the following code to create some response values and predictions. Test your new function using this data.**
 
-    ``` r
+    ```{r}
     set.seed(10)
     n <- 100
     x <- runif(n)
@@ -136,52 +138,57 @@ getRMSE(resp, pred, na.rm = TRUE)
     getMetrics(resp, data.frame(pred))
     ```
 
+
 # Task 3 - Querying an API and a Tidy-Style Function
 
 1.  **Use GET() from the httr package to return information about a topic that you are interested in that has been in the news lately.**
 
-    ``` r
-    library(httr)
-    library(dplyr)
-
-    api_key <- "98bec7bb7a124469b04c6e019b33abee"
-    url <- "https://newsapi.org/v2/everything"
-    params <- list(
-      q = "technology",
-      from = Sys.Date() - 30,
-      sortBy = "publishedAt",
-      apiKey = api_key
-    )
-
-    response <- GET(url, query = params)
-    articles <- content(response)$articles
-    articles_df <- bind_rows(lapply(articles, as.data.frame))
-    ```
 
 2.  **Parse what is returned and find your way to the data frame that has the actual article information in it.**
 
-    ``` r
-    articles_df <- bind_rows(lapply(articles, as.data.frame))
-    ```
-
 3.  **Write a quick function that allows the user to easily query this API.**
 
-    ``` r
-    get_news <- function(query, from_date, api_key) {
-      url <- "https://newsapi.org/v2/everything"
-      params <- list(
-        q = query,
-        from = from_date,
-        sortBy = "publishedAt",
-        apiKey = api_key
-      )
-      response <- GET(url, query = params)
-      articles <- content(response)$articles
-      articles_df <- bind_rows(lapply(articles, as.data.frame))
-      return(articles_df)
-    }
+```{R}
+# Load necessary packages
+library(httr)
+library(jsonlite)
+library(dplyr)
 
-    # Test the function
-    news1 <- get_news("technology", Sys.Date() - 30, api_key)
-    news2 <- get_news("science", Sys.Date() - 30, api_key)
-    ```
+# Function to query the News API
+query_news_api <- function(topic, from_date, api_key) {
+  # Define the base URL for the News API
+  base_url <- "https://newsapi.org/v2/everything"
+  
+  # Make the GET request
+  response <- GET(base_url, query = list(
+    q = topic,
+    from = from_date,
+    apiKey = api_key
+  ))
+  
+  # Check if the request was successful
+  if (status_code(response) != 200) {
+    stop("Failed to fetch data from the News API.")
+  }
+  
+  # Parse the response content
+  content <- content(response, as = "text")
+  json_data <- fromJSON(content, flatten = TRUE)
+  
+  # Extract articles into a data frame
+  articles_df <- json_data$articles
+  
+  return(articles_df)
+}
+
+
+
+api_key <- "..."
+articles_df1 <- query_news_api("technology", "2024-06-01", api_key)
+articles_df2 <- query_news_api("finance", "2024-06-01", api_key)
+
+
+
+articles_df1
+articles_df2
+```
