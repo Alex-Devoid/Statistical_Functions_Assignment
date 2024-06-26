@@ -182,8 +182,8 @@ query_news_api <- function(topic, from_date, api_key) {
 }
 
 
-
-api_key <- "..."
+#key is dead dont worry 
+api_key <- "98bec7bb7a124469b04c6e019b33abee"
 articles_df1 <- query_news_api("technology", "2024-06-01", api_key)
 articles_df2 <- query_news_api("finance", "2024-06-01", api_key)
 
