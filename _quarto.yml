@@ -1,5 +1,9 @@
 project:
   title: "Statistical_Functions_Assignment"
+  type: website
+  output-dir: docs
+
+
 
 
 
